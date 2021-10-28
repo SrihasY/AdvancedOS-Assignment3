@@ -1,4 +1,4 @@
-#include<stdint.h>
+#include <stdint.h>
 
 const static int BLOCKSIZE = 4*1024;
 
@@ -10,8 +10,7 @@ typedef struct disk {
 	char **block_arr; // array (of size blocks) of pointers to 4KB blocks
 } disk;
 
-
-int create_disk(disk *diskptr, int nbytes);
+disk* create_disk(int nbytes);
 
 int read_block(disk *diskptr, int blocknr, void *block_data);
 
