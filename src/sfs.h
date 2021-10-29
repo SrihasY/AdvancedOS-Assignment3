@@ -1,5 +1,7 @@
 #include<stdint.h>
 
+#define MAX_LEN 256
+
 const static uint32_t MAGIC = 12345;
 
 
@@ -25,6 +27,13 @@ typedef struct super_block {
 	uint32_t data_blocks;  // Number of blocks reserved as data blocks
 } super_block;
 
+typedef struct dir_item {
+    uint8_t valid;
+    uint8_t is_dir;
+    char filename[MAX_LEN];
+    uint8_t filename_len;
+    uint32_t inumber;    
+} dir_item;
 
 int format(disk *diskptr);
 
@@ -42,8 +51,14 @@ int write_i(int inumber, char *data, int length, int offset);
 
 int fit_to_size(int inumber, int size);
 
+int get_filesize(int inumber);
 
 int read_file(char *filepath, char *data, int length, int offset);
 int write_file(char *filepath, char *data, int length, int offset);
+// create_dir and remove_dir are only for directories, similar functions are provided for files
 int create_dir(char *dirpath);
 int remove_dir(char *dirpath);
+
+int init_dirsys(disk* diskptr);
+int create_file_by_path(char* filepath);
+int remove_file_by_path(char* filepath);

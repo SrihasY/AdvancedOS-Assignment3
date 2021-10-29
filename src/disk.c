@@ -4,7 +4,7 @@
 
 disk* create_disk(int nbytes) {
     disk* diskptr;
-    if(nbytes < sizeof(disk) + BLOCKSIZE) {
+    if(nbytes < sizeof(disk)) {
         //disk too small
         return NULL;
     } else {
@@ -39,7 +39,7 @@ disk* create_disk(int nbytes) {
 }
 
 int read_block(disk *diskptr, int blocknr, void *block_data) {
-    if(blocknr < 0 || blocknr > diskptr->blocks-1) {
+    if(blocknr < 0 || blocknr > (int) diskptr->blocks-1) {
         return -1;
     }
     memcpy(block_data, diskptr->block_arr[blocknr], BLOCKSIZE);
@@ -48,7 +48,7 @@ int read_block(disk *diskptr, int blocknr, void *block_data) {
 }
 
 int write_block(disk *diskptr, int blocknr, void *block_data) {
-    if(blocknr < 0 || blocknr > diskptr->blocks-1) {
+    if(blocknr < 0 || blocknr > (int) diskptr->blocks-1) {
         return -1;
     }
     memcpy(diskptr->block_arr[blocknr], block_data, BLOCKSIZE);
@@ -57,7 +57,7 @@ int write_block(disk *diskptr, int blocknr, void *block_data) {
 }
 
 int free_disk(disk *diskptr) {
-    for(int i=0; i<diskptr->blocks; i++) {
+    for(int i=0; i<(int) diskptr->blocks; i++) {
         free(diskptr->block_arr[i]);
     }
     free(diskptr->block_arr);
