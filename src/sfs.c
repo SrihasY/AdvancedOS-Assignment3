@@ -130,7 +130,7 @@ int find_free_datablock(super_block* sb) {
                 for(int k=0; k<32; k++) {
                     if(!TestBit(wordstart, k)) {
                         if((i-sb->data_block_bitmap_idx)*8*BLOCKSIZE+j*32+k >= sb->data_blocks) {
-                            printf("limit reached. %d", sb->data_blocks);
+                            printf("Data block limit reached.\n");
                             retval = -1;
                             break;
                         }

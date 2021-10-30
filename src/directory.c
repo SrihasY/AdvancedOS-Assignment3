@@ -182,7 +182,6 @@ int remove_dir(char *dirpath) {
 
     int parinode = find_dir(parent);
     int inumber = find_dir(dirpath);
-    printf("%s, %s, %d, %d\n", parent, dirpath, parinode, inumber);
     dir_item* current = (dir_item*) malloc(sizeof(dir_item));
     if(!current) {
         return -1;
@@ -243,6 +242,7 @@ int remove_dir(char *dirpath) {
 }
 
 int create_file_by_path(char* filepath) {
+    int retval = -1;
     if(!dir_initialized) {
         printf("Directory system not initialized.\n");
         return -1;
@@ -294,6 +294,7 @@ int create_file_by_path(char* filepath) {
         printf("Unable to create directory file.\n");
         goto err;
     }
+    retval = current->inumber;
     //update the parent directory
     if(freespot>0) {
         if(write_i(par_inode, (char*) current, sizeof(dir_item), freespot) < 0) {
@@ -311,7 +312,7 @@ int create_file_by_path(char* filepath) {
     free(dirc);
     free(basec);
     free(current);
-    return 0;
+    return retval;
     err:
         free(dirc);
         free(basec);
@@ -373,6 +374,114 @@ int remove_file_by_path(char* filepath) {
     free(basec);
     free(current);
     return 0;
+    err:
+        free(dirc);
+        free(basec);
+        free(current);
+        return -1;
+}
+
+int read_file(char *filepath, char *data, int length, int offset) {
+    int retval = -1;
+    if(!dir_initialized) {
+        printf("Directory system not initialized.\n");
+        return -1;
+    }
+    char* dirc = strdup(filepath);
+    char* basec = strdup(filepath);
+    char* parent = dirname(dirc);
+    char* base = basename(basec);
+    if(strlen(base) >= MAX_LEN) {
+        printf("Filename too long.\n");
+        free(dirc);
+        free(basec);
+        return -1;
+    }
+    int par_inode = find_dir(parent);
+    dir_item* current = (dir_item*) malloc(sizeof(dir_item));
+    if(!current) {
+        free(dirc);
+        free(basec);
+        return -1;
+    }
+    if(par_inode < 0) {
+        printf("Parent directory not found.\n");
+        goto err;
+    }
+    int diroffset = 0;
+    while(diroffset < get_filesize(par_inode)) {
+        if(read_i(par_inode, (char*) current, sizeof(dir_item), diroffset) < 0) {
+            goto err;
+        }
+        if(strcmp(current->filename, base)==0) {
+            if(!current->valid) {
+                goto err;
+            }
+            if((retval = read_i(current->inumber, data, length, offset)) < 0) {
+                goto err;
+            }
+            break;
+        }
+        diroffset += sizeof(dir_item);
+    }
+    free(dirc);
+    free(basec);
+    free(current);
+    return retval;
+    err:
+        free(dirc);
+        free(basec);
+        free(current);
+        return -1;
+}
+
+int write_file(char *filepath, char *data, int length, int offset) {
+    int retval = -1;
+    if(!dir_initialized) {
+        printf("Directory system not initialized.\n");
+        return -1;
+    }
+    char* dirc = strdup(filepath);
+    char* basec = strdup(filepath);
+    char* parent = dirname(dirc);
+    char* base = basename(basec);
+    if(strlen(base) >= MAX_LEN) {
+        printf("Filename too long.\n");
+        free(dirc);
+        free(basec);
+        return -1;
+    }
+    int par_inode = find_dir(parent);
+    dir_item* current = (dir_item*) malloc(sizeof(dir_item));
+    if(!current) {
+        free(dirc);
+        free(basec);
+        return -1;
+    }
+    if(par_inode < 0) {
+        printf("Parent directory not found.\n");
+        goto err;
+    }
+    int diroffset = 0;
+    while(diroffset < get_filesize(par_inode)) {
+        if(read_i(par_inode, (char*) current, sizeof(dir_item), diroffset) < 0) {
+            goto err;
+        }
+        if(strcmp(current->filename, base)==0) {
+            if(!current->valid) {
+                goto err;
+            }
+            if((retval = write_i(current->inumber, data, length, offset)) < 0) {
+                goto err;
+            }
+            break;
+        }
+        diroffset += sizeof(dir_item);
+    }
+    free(dirc);
+    free(basec);
+    free(current);
+    return retval;
     err:
         free(dirc);
         free(basec);

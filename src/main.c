@@ -39,8 +39,16 @@ int main(){
 	printf("%d\n", create_dir("usr"));
 	printf("%d\n", create_dir("usr/srihas"));
 	printf("%d\n", create_file_by_path("usr/srihas/file1"));
-	printf("%d\n", remove_dir("/usr/srihas/file1"));
-	printf("%d\n", remove_dir("/usr/srihas"));
-	printf("%d\n", remove_file_by_path("/usr/srihas/file1"));
+	int* data = (int*) malloc(BLOCKSIZE*50);
+	for(int i=0; i<BLOCKSIZE*50/4; i++) {
+		data[i] = -i;
+	}
+	printf("Write:%d\n", write_file("/usr/srihas/file1", data, BLOCKSIZE*50, 0));
+	int* data2 = (int*) malloc(BLOCKSIZE*50);
+	printf("Read:%d\n", read_file("/usr/srihas/file1", data2, 40*BLOCKSIZE, 0));
+	for(int i=0; i<BLOCKSIZE*40/4; i++) {
+		printf("%d %d\n", data[i], data2[i]);
+	}
+	printf("%d\n", remove_dir("/usr"));
 	return 0;
 }
